@@ -38,9 +38,10 @@ async function generateThumbnails() {
 
         try {
           await sharp(inputPath)
+            .rotate()
             .resize(thumbnailSize, thumbnailSize, {
-              fit: 'cover',
-              position: 'center'
+              fit: 'contain',
+              background: { r: 0, g: 0, b: 0, alpha: 0 }
             })
             .toFile(outputPath);
 
