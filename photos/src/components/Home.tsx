@@ -43,32 +43,16 @@ function Home() {
 
   const fetchAlbumCovers = async () => {
     try {
-      // Dynamically import all images from public/images directory
-      const imageModules = import.meta.glob('/public/images/*/*', {
-        eager: false
-      });
-      
-      const albumMap = new Map<string, string[]>();
-      
-      // Parse the paths to extract album names and images
-      for (const path of Object.keys(imageModules)) {
-        const match = path.match(/\/public\/images\/([^/]+)\/(.+)$/);
-        if (match) {
-          const [, albumName, fileName] = match;
-          if (!albumMap.has(albumName)) {
-            albumMap.set(albumName, []);
-          }
-          albumMap.get(albumName)!.push(fileName);
-        }
-      }
+      // Fetch the albums manifest
+      const response = await fetch('/albums-manifest.json');
+      const manifest = await response.json();
       
       // Sort albums and get first image from each
       const albumList: Album[] = [];
-      const sortedAlbumNames = Array.from(albumMap.keys()).sort();
+      const sortedAlbumNames = Object.keys(manifest).sort();
       
       for (const albumName of sortedAlbumNames) {
-        const images = albumMap.get(albumName) || [];
-        images.sort();
+        const images = manifest[albumName] || [];
         if (images.length > 0) {
           albumList.push({
             url: `/images/${albumName}/${images[0]}`,
@@ -77,7 +61,7 @@ function Home() {
         }
       }
       
-      console.log('Dynamically loaded albums:', albumList);
+      console.log('Loaded albums from manifest:', albumList);
       setAlbums(albumList);
       setLoading(false);
     } catch (error) {

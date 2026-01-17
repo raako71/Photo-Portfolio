@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 function Album() {
   const { albumName } = useParams<{ albumName: string }>();
   const [images, setImages] = useState<string[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
   useEffect(() => {
     if (albumName) {
@@ -16,21 +15,11 @@ function Album() {
 
   const fetchAlbumImages = async (name: string) => {
     try {
-      // Use import.meta.glob to get all images from the album
-      const imageModules = import.meta.glob('/public/images/*/*', {
-        eager: false
-      });
+      // Fetch the albums manifest
+      const response = await fetch('/albums-manifest.json');
+      const manifest = await response.json();
       
-      const albumImages: string[] = [];
-      
-      for (const path of Object.keys(imageModules)) {
-        const match = path.match(/\/public\/images\/([^/]+)\/(.+)$/);
-        if (match && match[1] === name && !path.includes('/thumbs/')) {
-          albumImages.push(match[2]);
-        }
-      }
-      
-      albumImages.sort();
+      const albumImages = manifest[name] || [];
       setImages(albumImages);
       setLoading(false);
     } catch (error) {
