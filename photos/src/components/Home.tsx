@@ -12,6 +12,7 @@ function Home() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [showIntro, setShowIntro] = useState(true);
+  const [fadeOut, setFadeOut] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -71,11 +72,19 @@ function Home() {
   };
 
   const nextImage = () => {
-    setCurrentIndex((prev) => (prev + 1) % albums.length);
+    setFadeOut(true);
+    setTimeout(() => {
+      setCurrentIndex((prev) => (prev + 1) % albums.length);
+      setFadeOut(false);
+    }, 250);
   };
 
   const prevImage = () => {
-    setCurrentIndex((prev) => (prev - 1 + albums.length) % albums.length);
+    setFadeOut(true);
+    setTimeout(() => {
+      setCurrentIndex((prev) => (prev - 1 + albums.length) % albums.length);
+      setFadeOut(false);
+    }, 250);
   };
 
   const handleAlbumClick = () => {
@@ -126,7 +135,7 @@ function Home() {
         <img
           src={albums[currentIndex].url}
           alt={albums[currentIndex].name}
-          className="slider-image"
+          className={`slider-image ${fadeOut ? 'fade-out' : 'fade-in'}`}
         />
         <div className="album-name" onClick={handleAlbumClick}>
           {albums[currentIndex].name}
