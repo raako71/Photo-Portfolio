@@ -94,10 +94,73 @@
         object-fit: contain;
     `;
     
+    // Create left arrow
+    const leftArrow = document.createElement('div');
+    leftArrow.innerHTML = '‹';
+    leftArrow.style.cssText = `
+        position: absolute;
+        left: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 48px;
+        color: rgba(255, 255, 255, 0.7);
+        cursor: pointer;
+        user-select: none;
+        z-index: 10;
+    `;
+    leftArrow.addEventListener('click', () => {
+        currentIndex = (currentIndex - 1 + albums.length) % albums.length;
+        showImage(currentIndex);
+    });
+    
+    // Create right arrow
+    const rightArrow = document.createElement('div');
+    rightArrow.innerHTML = '›';
+    rightArrow.style.cssText = `
+        position: absolute;
+        right: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 48px;
+        color: rgba(255, 255, 255, 0.7);
+        cursor: pointer;
+        user-select: none;
+        z-index: 10;
+    `;
+    rightArrow.addEventListener('click', () => {
+        currentIndex = (currentIndex + 1) % albums.length;
+        showImage(currentIndex);
+    });
+    
     sliderContainer.appendChild(img);
+    sliderContainer.appendChild(leftArrow);
+    sliderContainer.appendChild(rightArrow);
     document.body.appendChild(sliderContainer);
     
     setTimeout(() => sliderContainer.style.opacity = '1', 50);
+    
+    // Touch navigation for mobile
+    let touchStartX = 0;
+    let touchEndX = 0;
+    
+    sliderContainer.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+    });
+    
+    sliderContainer.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        const deltaX = touchEndX - touchStartX;
+        
+        if (deltaX > 50) {
+            // Swipe right - previous image
+            currentIndex = (currentIndex - 1 + albums.length) % albums.length;
+            showImage(currentIndex);
+        } else if (deltaX < -50) {
+            // Swipe left - next image
+            currentIndex = (currentIndex + 1) % albums.length;
+            showImage(currentIndex);
+        }
+    });
     
     function showImage(index) {
         if (albums.length > 0) {
@@ -120,24 +183,70 @@
     
     async function fetchAlbumCovers() {
     try {
+        console.log('Fetching ./images');
         const response = await fetch('./images');
+        console.log('Response status:', response.status);
         const html = await response.text();
+        console.log('Images directory HTML length:', html.length);
+        console.log('Images directory HTML preview:', html.substring(0, 500));
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
         const links = doc.querySelectorAll('a');
-        const albumNames = [];
+        console.log('Links found:', links.length);
+        const albums = [];
         
         for (const link of links) {
         let albumName = link.textContent.trim();
+        console.log('Raw link text:', albumName);
         // Extract folder name by removing timestamp (everything from first digit)
         albumName = albumName.replace(/\d.*$/, '').trim();
+        console.log('Cleaned album name:', albumName);
         if (albumName !== '..' && albumName !== '.' && albumName !== '~' && albumName !== 'images') {
-            albumNames.push(albumName);
+            console.log('Processing album:', albumName);
+            // Fetch the folder's directory listing to find an image
+            try {
+                console.log('Fetching folder:', `/images/${albumName}/`);
+                const folderResponse = await fetch(`/images/${albumName}/`);
+                console.log('Folder response status:', folderResponse.status);
+                const folderHtml = await folderResponse.text();
+                console.log('Folder HTML length:', folderHtml.length);
+                const folderDoc = new DOMParser().parseFromString(folderHtml, 'text/html');
+                const imageLinks = folderDoc.querySelectorAll('a');
+                console.log('Image links in folder:', imageLinks.length);
+                const imageNames = [];
+                
+                for (const imgLink of imageLinks) {
+                    let imgName = imgLink.textContent.trim();
+                    console.log('Raw image name:', imgName);
+                    // Extract file name by matching the extension and stopping before timestamp
+                    const match = imgName.match(/^(.+\.(jpg|jpeg|png|gif))/i);
+                    if (match) {
+                        imgName = match[1];
+                    } else {
+                        // Fallback: remove from first digit
+                        imgName = imgName.replace(/\d.*$/, '').trim();
+                    }
+                    console.log('Cleaned image name:', imgName);
+                    if (imgName !== '..' && imgName !== '.' && imgName.match(/\.(jpg|jpeg|png|gif)$/i)) {
+                        imageNames.push(imgName);
+                    }
+                }
+                
+                if (imageNames.length > 0) {
+                    // Sort alphabetically and use the first one
+                    imageNames.sort();
+                    const imageUrl = `/images/${albumName}/${imageNames[0]}`;
+                    console.log('Adding image:', imageUrl);
+                    albums.push(imageUrl);
+                }
+            } catch (folderError) {
+                console.warn(`Could not fetch images for album ${albumName}:`, folderError);
+            }
         }
         }
         
-        console.log('Album names:', albumNames);
-        return albumNames;
+        console.log('Album covers:', albums);
+        return albums;
     } catch (error) {
         console.error('Error fetching albums:', error);
         return [];
