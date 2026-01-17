@@ -6,25 +6,30 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const imagesDir = path.join(__dirname, '..', 'public', 'images');
+const sourcesDir = path.join(__dirname, '..', 'sources', 'images');
+const publicDir = path.join(__dirname, '..', 'public', 'images');
 const thumbnailSize = 200;
 const webSize = 1920; // Max dimension for web-sized images
 
 async function generateThumbnails() {
   try {
-    // Get all album directories
-    const albums = fs.readdirSync(imagesDir).filter(file => {
-      return fs.statSync(path.join(imagesDir, file)).isDirectory();
+    // Get all album directories from sources
+    const albums = fs.readdirSync(sourcesDir).filter(file => {
+      return fs.statSync(path.join(sourcesDir, file)).isDirectory();
     });
 
     const manifest = {};
 
     for (const album of albums) {
-      const albumPath = path.join(imagesDir, album);
-      const thumbDir = path.join(albumPath, 'thumbs');
-      const webDir = path.join(albumPath, 'web');
+      const sourceAlbumPath = path.join(sourcesDir, album);
+      const publicAlbumPath = path.join(publicDir, album);
+      const thumbDir = path.join(publicAlbumPath, 'thumbs');
+      const webDir = path.join(publicAlbumPath, 'web');
 
-      // Create thumbs and web directories if they don't exist
+      // Create public album, thumbs and web directories if they don't exist
+      if (!fs.existsSync(publicAlbumPath)) {
+        fs.mkdirSync(publicAlbumPath, { recursive: true });
+      }
       if (!fs.existsSync(thumbDir)) {
         fs.mkdirSync(thumbDir, { recursive: true });
       }
@@ -32,8 +37,8 @@ async function generateThumbnails() {
         fs.mkdirSync(webDir, { recursive: true });
       }
 
-      // Get all image files
-      const files = fs.readdirSync(albumPath).filter(file => {
+      // Get all image files from source
+      const files = fs.readdirSync(sourceAlbumPath).filter(file => {
         return /\.(jpg|jpeg|png|gif)$/i.test(file);
       });
 
@@ -42,7 +47,7 @@ async function generateThumbnails() {
       manifest[album] = files.sort();
 
       for (const file of files) {
-        const inputPath = path.join(albumPath, file);
+        const inputPath = path.join(sourceAlbumPath, file);
         const thumbPath = path.join(thumbDir, file);
         const webPath = path.join(webDir, file);
 

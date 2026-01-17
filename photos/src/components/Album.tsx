@@ -44,7 +44,7 @@ function Album() {
       
       <div className="image-viewer">
         <img
-          src={`/images/${albumName}/${images[selectedIndex]}`}
+          src={`/images/${albumName}/web/${images[selectedIndex]}`}
           alt={images[selectedIndex]}
           className="main-image"
         />

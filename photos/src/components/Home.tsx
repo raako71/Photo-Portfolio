@@ -55,7 +55,7 @@ function Home() {
         const images = manifest[albumName] || [];
         if (images.length > 0) {
           albumList.push({
-            url: `/images/${albumName}/${images[0]}`,
+            url: `/images/${albumName}/web/${images[0]}`,
             name: albumName
           });
         }
