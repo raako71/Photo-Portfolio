@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './Home.css';
 
 interface Album {
@@ -14,8 +14,13 @@ function Home() {
   const [showIntro, setShowIntro] = useState(true);
   const [fadeOut, setFadeOut] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
+    // Skip intro if navigating back from an album (not initial load)
+    if (location.key !== 'default') {
+      setShowIntro(false);
+    }
     fetchAlbumCovers();
   }, []);
 

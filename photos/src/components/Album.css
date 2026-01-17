@@ -3,6 +3,8 @@
   color: white;
   min-height: 100vh;
   padding: 20px;
+  display: flex;
+  flex-direction: column;
 }
 
 .back-link {
@@ -11,6 +13,7 @@
   font-size: 18px;
   display: inline-block;
   margin-bottom: 20px;
+  align-self: flex-start;
 }
 
 .back-link:hover {
@@ -20,31 +23,61 @@
 .album-container h2 {
   text-align: center;
   margin-bottom: 30px;
+  margin-top: 0;
+}
+
+.image-viewer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+  margin-bottom: 30px;
+  min-height: 400px;
+}
+
+.main-image {
+  max-width: 90vw;
+  max-height: 60vh;
+  object-fit: contain;
 }
 
 .thumbnails {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 15px;
   justify-items: center;
+  margin-top: auto;
 }
 
 .thumbnail {
   width: 100%;
-  max-width: 200px;
-  height: auto;
+  max-width: 150px;
+  height: 150px;
+  object-fit: cover;
   cursor: pointer;
-  border: 2px solid transparent;
+  border: 3px solid transparent;
   transition: border-color 0.3s;
 }
 
 .thumbnail:hover {
+  border-color: #666;
+}
+
+.thumbnail.active {
   border-color: white;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
 
 .loading {
   color: white;
   font-size: 24px;
+  text-align: center;
+  margin-top: 50px;
+}
+
+.error {
+  color: white;
+  font-size: 20px;
   text-align: center;
   margin-top: 50px;
 }
