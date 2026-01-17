@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import './Album.css';
 
 function Album() {
   const { albumName } = useParams<{ albumName: string }>();
@@ -50,15 +49,17 @@ function Album() {
 
   return (
     <div className="album-container">
-      <button 
-        className="back-link"
-        onClick={() => {
-          window.location.href = `/#${albumName}`;
-        }}
-      >
-        ← Back to Portfolio
-      </button>
-      <h2>{albumName}</h2>
+      <div className="header">
+        <button 
+          className="back-link"
+          onClick={() => {
+            window.location.href = `/#${albumName}`;
+          }}
+        >
+          ← Back to Portfolio
+        </button>
+        <h2>{albumName}</h2>
+      </div>
       
       <div className="image-viewer">
         <img
@@ -67,6 +68,8 @@ function Album() {
           className="main-image"
         />
       </div>
+
+      <div className="scroll-indicator">▼</div>
       
       <div className="thumbnails">
         {images.map((imgName, index) => (
