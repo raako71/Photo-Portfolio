@@ -150,6 +150,7 @@ function Home() {
         <img
           src={albums[currentIndex].url}
           alt={albums[currentIndex].name}
+          onClick={handleAlbumClick}
           className={`slider-image ${fadeOut ? 'fade-out' : 'fade-in'}`}
         />
         <div className="album-name" onClick={handleAlbumClick}>

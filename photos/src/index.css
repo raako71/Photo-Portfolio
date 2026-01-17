@@ -171,6 +171,7 @@ button:focus-visible {
   object-fit: contain;
   opacity: 1;
   transition: opacity 0.5s ease;
+  cursor: pointer;
 }
 
 .slider-image.fade-out {
@@ -262,13 +263,13 @@ button:focus-visible {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 80vh;
-  padding: 20px;
+  min-height: 70vh;
+  padding: 15px;
 }
 
 .main-image {
   max-width: 80vw;
-  max-height: 75vh;
+  max-height: 70vh;
   width: auto;
   height: auto;
   object-fit: contain;
@@ -294,17 +295,19 @@ button:focus-visible {
 }
 
 .thumbnails {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  display: flex;
   gap: 15px;
   padding: 20px;
   width: 100%;
   background: black;
+  overflow-x: auto;
+  justify-content: center;
 }
 
 .thumbnail {
-  width: 100%;
+  width: 150px;
   height: 150px;
+  min-width: 150px;
   object-fit: cover;
   cursor: pointer;
   border: 3px solid transparent;
