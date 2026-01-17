@@ -52,7 +52,9 @@ function Album() {
     <div className="album-container">
       <button 
         className="back-link"
-        onClick={() => navigate('/')}
+        onClick={() => {
+          window.location.href = `/#${albumName}`;
+        }}
       >
         ← Back to Portfolio
       </button>

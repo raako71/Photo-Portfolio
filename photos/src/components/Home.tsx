@@ -17,8 +17,8 @@ function Home() {
   const location = useLocation();
 
   useEffect(() => {
-    // Skip intro if navigating back from an album (not initial load)
-    if (location.key !== 'default') {
+    // Skip intro if navigating back from an album (not initial load) or if hash is present
+    if (location.key !== 'default' || window.location.hash) {
       setShowIntro(false);
     }
     fetchAlbumCovers();
@@ -31,19 +31,16 @@ function Home() {
     }
   }, [showIntro]);
 
-  // Check if a specific album is requested via query parameter
+  // Check if a specific album is requested via hash
   useEffect(() => {
-    if (albums.length > 0) {
-      const params = new URLSearchParams(location.search);
-      const requestedAlbum = params.get('album');
-      if (requestedAlbum) {
-        const albumIndex = albums.findIndex(album => album.name === decodeURIComponent(requestedAlbum));
-        if (albumIndex !== -1) {
-          setCurrentIndex(albumIndex);
-        }
+    if (albums.length > 0 && window.location.hash) {
+      const requestedAlbum = decodeURIComponent(window.location.hash.slice(1));
+      const albumIndex = albums.findIndex(album => album.name === requestedAlbum);
+      if (albumIndex !== -1) {
+        setCurrentIndex(albumIndex);
       }
     }
-  }, [albums, location.search]);
+  }, [albums]);
 
   const fetchAlbumCovers = async () => {
     try {
