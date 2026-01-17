@@ -50,14 +50,6 @@ function Album() {
   return (
     <div className="album-container">
       <div className="header">
-        <button 
-          className="back-link"
-          onClick={() => {
-            window.location.href = `/#${albumName}`;
-          }}
-        >
-          ← Back to Portfolio
-        </button>
         <h2>{albumName}</h2>
       </div>
       
@@ -83,6 +75,15 @@ function Album() {
           />
         ))}
       </div>
+
+      <button 
+        className="back-link-bottom"
+        onClick={() => {
+          window.location.href = `/#${albumName}`;
+        }}
+      >
+        ← Back to Portfolio
+      </button>
     </div>
   );
 }

@@ -94,9 +94,11 @@ button:focus-visible {
 
 .intro-text {
   font-size: 72px;
-  font-weight: bold;
+  font-weight: 400;
+  font-style: normal;
+  font-optical-sizing: auto;
   color: white;
-  font-family: cursive;
+  font-family: "Playwrite AU TAS", serif;
   margin: 0;
   animation: fadeInText 3s ease-in forwards;
 }
@@ -189,6 +191,9 @@ button:focus-visible {
   text-align: center;
   cursor: pointer;
   text-decoration: underline;
+  font-family: "Playwrite AU TAS", serif;
+  font-weight: 400;
+  font-style: normal;
 }
 
 .arrow {
@@ -230,11 +235,22 @@ button:focus-visible {
 
 .header {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 20px;
-  padding: 0 20px;
+  gap: 10px;
+  padding: 15px 20px;
   border-bottom: 1px solid #333;
-  height: 10vh;
+  height: auto;
+  justify-content: center;
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 24px;
+  text-align: center;
+  font-family: "Playwrite AU TAS", cursive;
+  font-weight: 400;
+  font-optical-sizing: auto;
 }
 
 .back-link {
@@ -254,9 +270,24 @@ button:focus-visible {
   text-decoration: underline;
 }
 
-.header h2 {
-  margin: 0;
-  font-size: 24px;
+.back-link-bottom {
+  color: white;
+  text-decoration: none;
+  font-size: 16px;
+  display: inline-block;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 15px 20px;
+  font: inherit;
+  white-space: nowrap;
+  text-align: center;
+  width: 100%;
+}
+
+.back-link-bottom:hover {
+  text-decoration: underline;
+  background: #1a1a1a;
 }
 
 .image-viewer {
