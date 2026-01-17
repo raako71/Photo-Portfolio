@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import './Album.css';
 
 function Album() {
@@ -7,6 +7,7 @@ function Album() {
   const [images, setImages] = useState<string[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (albumName) {
@@ -49,7 +50,12 @@ function Album() {
 
   return (
     <div className="album-container">
-      <Link to="/" className="back-link">← Back to Portfolio</Link>
+      <button 
+        className="back-link"
+        onClick={() => navigate('/')}
+      >
+        ← Back to Portfolio
+      </button>
       <h2>{albumName}</h2>
       
       <div className="image-viewer">

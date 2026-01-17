@@ -31,6 +31,20 @@ function Home() {
     }
   }, [showIntro]);
 
+  // Check if a specific album is requested via query parameter
+  useEffect(() => {
+    if (albums.length > 0) {
+      const params = new URLSearchParams(location.search);
+      const requestedAlbum = params.get('album');
+      if (requestedAlbum) {
+        const albumIndex = albums.findIndex(album => album.name === decodeURIComponent(requestedAlbum));
+        if (albumIndex !== -1) {
+          setCurrentIndex(albumIndex);
+        }
+      }
+    }
+  }, [albums, location.search]);
+
   const fetchAlbumCovers = async () => {
     try {
       // Dynamically import all images from public/images directory
