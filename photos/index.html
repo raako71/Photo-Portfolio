@@ -183,41 +183,28 @@
     
     async function fetchAlbumCovers() {
     try {
-        console.log('Fetching ./images');
         const response = await fetch('./images');
-        console.log('Response status:', response.status);
         const html = await response.text();
-        console.log('Images directory HTML length:', html.length);
-        console.log('Images directory HTML preview:', html.substring(0, 500));
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
         const links = doc.querySelectorAll('a');
-        console.log('Links found:', links.length);
         const albums = [];
         
         for (const link of links) {
         let albumName = link.textContent.trim();
-        console.log('Raw link text:', albumName);
         // Extract folder name by removing timestamp (everything from first digit)
         albumName = albumName.replace(/\d.*$/, '').trim();
-        console.log('Cleaned album name:', albumName);
         if (albumName !== '..' && albumName !== '.' && albumName !== '~' && albumName !== 'images') {
-            console.log('Processing album:', albumName);
             // Fetch the folder's directory listing to find an image
             try {
-                console.log('Fetching folder:', `/images/${albumName}/`);
                 const folderResponse = await fetch(`/images/${albumName}/`);
-                console.log('Folder response status:', folderResponse.status);
                 const folderHtml = await folderResponse.text();
-                console.log('Folder HTML length:', folderHtml.length);
                 const folderDoc = new DOMParser().parseFromString(folderHtml, 'text/html');
                 const imageLinks = folderDoc.querySelectorAll('a');
-                console.log('Image links in folder:', imageLinks.length);
                 const imageNames = [];
                 
                 for (const imgLink of imageLinks) {
                     let imgName = imgLink.textContent.trim();
-                    console.log('Raw image name:', imgName);
                     // Extract file name by matching the extension and stopping before timestamp
                     const match = imgName.match(/^(.+\.(jpg|jpeg|png|gif))/i);
                     if (match) {
@@ -226,7 +213,6 @@
                         // Fallback: remove from first digit
                         imgName = imgName.replace(/\d.*$/, '').trim();
                     }
-                    console.log('Cleaned image name:', imgName);
                     if (imgName !== '..' && imgName !== '.' && imgName.match(/\.(jpg|jpeg|png|gif)$/i)) {
                         imageNames.push(imgName);
                     }
@@ -236,7 +222,6 @@
                     // Sort alphabetically and use the first one
                     imageNames.sort();
                     const imageUrl = `/images/${albumName}/${imageNames[0]}`;
-                    console.log('Adding image:', imageUrl);
                     albums.push(imageUrl);
                 }
             } catch (folderError) {
