@@ -51,27 +51,40 @@ async function generateThumbnails() {
         const thumbPath = path.join(thumbDir, file);
         const webPath = path.join(webDir, file);
 
+        // Skip if both files already exist
+        const thumbExists = fs.existsSync(thumbPath);
+        const webExists = fs.existsSync(webPath);
+        
+        if (thumbExists && webExists) {
+          console.log(`  ⊙ Skipped (already exists): ${file}`);
+          continue;
+        }
+
         try {
-          // Generate thumbnail
-          await sharp(inputPath)
-            .rotate()
-            .resize(thumbnailSize, thumbnailSize, {
-              fit: 'contain',
-              background: { r: 0, g: 0, b: 0, alpha: 0 }
-            })
-            .toFile(thumbPath);
+          // Generate thumbnail if it doesn't exist
+          if (!thumbExists) {
+            await sharp(inputPath)
+              .rotate()
+              .resize(thumbnailSize, thumbnailSize, {
+                fit: 'contain',
+                background: { r: 0, g: 0, b: 0, alpha: 0 }
+              })
+              .toFile(thumbPath);
+          }
 
-          // Generate web-sized image
-          await sharp(inputPath)
-            .rotate()
-            .resize(webSize, webSize, {
-              fit: 'inside',
-              withoutEnlargement: true
-            })
-            .jpeg({ quality: 85 })
-            .toFile(webPath);
+          // Generate web-sized image if it doesn't exist
+          if (!webExists) {
+            await sharp(inputPath)
+              .rotate()
+              .resize(webSize, webSize, {
+                fit: 'inside',
+                withoutEnlargement: true
+              })
+              .jpeg({ quality: 85 })
+              .toFile(webPath);
+          }
 
-          console.log(`  ✓ Created thumbnail and web image: ${file}`);
+          console.log(`  ✓ Created ${!thumbExists ? 'thumbnail' : ''} ${!thumbExists && !webExists ? 'and' : ''} ${!webExists ? 'web image' : ''}: ${file}`);
         } catch (error) {
           console.error(`  ✗ Error processing ${file}:`, error.message);
         }
