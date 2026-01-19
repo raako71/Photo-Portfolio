@@ -6,6 +6,7 @@ function Album() {
   const [images, setImages] = useState<string[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [isOverlayOpen, setIsOverlayOpen] = useState(false);
 
   useEffect(() => {
     if (albumName) {
@@ -47,8 +48,24 @@ function Album() {
           src={`/images/${albumName}/web/${images[selectedIndex]}`}
           alt={images[selectedIndex]}
           className="main-image"
+          onClick={() => setIsOverlayOpen(true)}
+          style={{ cursor: 'pointer' }}
         />
       </div>
+
+      {isOverlayOpen && (
+        <div 
+          className="image-overlay"
+          onClick={() => setIsOverlayOpen(false)}
+        >
+          <img
+            src={`/images/${albumName}/web/${images[selectedIndex]}`}
+            alt={images[selectedIndex]}
+            className="overlay-image"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
 
       <div className="scroll-indicator">▼</div>
       
