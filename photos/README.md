@@ -7,7 +7,7 @@
 
 note for nginx config:
 
- # Cache images for 1 month
+    # Cache images for 1 month
     location ~* \.(jpg|jpeg)$ {
        expires 30d;
        add_header Cache-Control "public";
