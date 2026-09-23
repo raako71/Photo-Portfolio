@@ -62,14 +62,21 @@ function Home() {
         }
       }
 
+      // Start every cover request immediately, but only gate the initial render
+      // on the first active cover.
+      const coverLoads = albumList.map((album) => new Promise<void>((resolve) => {
+        const img = new Image();
+        img.onload = () => resolve();
+        img.onerror = () => resolve();
+        img.src = album.url;
+      }));
+
+      if (coverLoads.length > 0) {
+        await coverLoads[0];
+      }
+
       console.log('Loaded albums from manifest:', albumList);
       setAlbums(albumList);
-
-      // Preload all album cover images so they are ready immediately on the home screen.
-      albumList.forEach((album) => {
-        const img = new Image();
-        img.src = album.url;
-      });
 
       setLoading(false);
     } catch (error) {
