@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import BreadcrumbHeader from './BreadcrumbHeader';
 
 interface Album {
   url: string;
@@ -132,6 +133,7 @@ function Home() {
 
   return (
     <>
+      <BreadcrumbHeader />
       {showIntro && (
         <div className="intro-overlay">
           <h1 className="intro-text">Photo Portfolio</h1>

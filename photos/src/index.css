@@ -78,6 +78,48 @@ button:focus-visible {
 }
 
 /* Home Component Styles */
+.breadcrumb-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 20;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 18px 24px;
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(10px);
+}
+
+.breadcrumb-header nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.breadcrumb-header a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.breadcrumb-header a:hover {
+  color: white;
+  text-decoration: underline;
+}
+
+.breadcrumb-header span[aria-current="page"] {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.fullscreen-header {
+  position: absolute;
+  background: transparent;
+  backdrop-filter: none;
+}
+
 .intro-overlay {
   position: fixed;
   top: 0;
@@ -136,6 +178,8 @@ button:focus-visible {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  padding-top: 64px;
+  box-sizing: border-box;
   opacity: 0;
   transition: opacity 1s ease-in;
   animation: fadeIn 1s ease-in forwards;
@@ -286,7 +330,7 @@ button:focus-visible {
   background: black;
   color: white;
   min-height: 100vh;
-  padding: 0 !important;
+  padding: 64px 0 0 !important;
   margin: 0 !important;
   display: flex;
   flex-direction: column;

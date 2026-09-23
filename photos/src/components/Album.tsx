@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import BreadcrumbHeader from './BreadcrumbHeader';
 
 function Album() {
   const { albumName } = useParams<{ albumName: string }>();
@@ -39,9 +40,7 @@ function Album() {
 
   return (
     <div className="album-container">
-      <div className="header">
-        <h2>{albumName}</h2>
-      </div>
+      <BreadcrumbHeader albumName={albumName} />
       
       <div className="image-viewer">
         <img
@@ -58,6 +57,7 @@ function Album() {
           className="image-overlay"
           onClick={() => setIsOverlayOpen(false)}
         >
+          <BreadcrumbHeader albumName={albumName} isFullscreen />
           <img
             src={`/images/${albumName}/web/${images[selectedIndex]}`}
             alt={images[selectedIndex]}
@@ -82,14 +82,6 @@ function Album() {
         ))}
       </div>
 
-      <button 
-        className="back-link-bottom"
-        onClick={() => {
-          window.location.href = `/#${albumName}`;
-        }}
-      >
-        ← Back to Portfolio
-      </button>
     </div>
   );
 }
