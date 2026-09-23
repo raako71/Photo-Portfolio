@@ -9,7 +9,7 @@ interface BreadcrumbHeaderProps {
 }
 
 /**
- * Home is a normal React Router link.
+ * Home crumb shows the site host (photos.raako.net) and links to "/".
  * Offline cache status shows here while the installed PWA prefetches images.
  * Hidden force-reload: long-press the header bar background (~2.5s).
  */
@@ -17,6 +17,10 @@ function BreadcrumbHeader({ albumName, isFullscreen = false }: BreadcrumbHeaderP
   const displayAlbumName = albumName?.replace(/^1/, '');
   const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [prefetchLabel, setPrefetchLabel] = useState('');
+  const homeLabel =
+    typeof window !== 'undefined' && window.location?.host
+      ? window.location.host
+      : 'photos.raako.net';
 
   useEffect(() => {
     const onPrefetch = (event: Event) => {
@@ -68,7 +72,9 @@ function BreadcrumbHeader({ albumName, isFullscreen = false }: BreadcrumbHeaderP
       onPointerCancel={clearPressTimer}
     >
       <nav aria-label="Breadcrumb">
-        <Link to="/">Home</Link>
+        <Link to="/" title="Home">
+          {homeLabel}
+        </Link>
         {albumName && (
           <>
             <span aria-hidden="true">&gt;</span>
