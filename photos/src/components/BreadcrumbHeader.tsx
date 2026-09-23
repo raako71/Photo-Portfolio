@@ -73,7 +73,7 @@ function BreadcrumbHeader({ albumName, isFullscreen = false }: BreadcrumbHeaderP
     >
       <nav aria-label="Breadcrumb">
         <Link to="/" title="Home">
-          {homeLabel}
+          Home ({homeLabel})
         </Link>
         {albumName && (
           <>
