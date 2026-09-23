@@ -138,16 +138,32 @@ function Home() {
         </div>
       )}
       <div className={`slider-container ${showIntro ? 'hidden' : 'visible'}`} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
-        <img
-          src={albums[currentIndex].url}
-          alt={albums[currentIndex].name}
-          onClick={handleAlbumClick}
-          loading="eager"
-          decoding="async"
-          className={`slider-image ${fadeOut ? 'fade-out' : 'fade-in'}`}
-        />
-        <div className="album-name" onClick={handleAlbumClick}>
-          {albums[currentIndex].name}
+        <div className="carousel-viewport">
+          <div
+            className={`carousel-track ${fadeOut ? 'fade-out' : 'fade-in'}`}
+            style={{ '--carousel-index': currentIndex } as React.CSSProperties}
+          >
+            {albums.map((album, albumIndex) => {
+              const isActive = albumIndex === currentIndex;
+
+              return (
+                <button
+                  key={album.name}
+                  className={`carousel-card ${isActive ? 'active' : ''}`}
+                  onClick={() => isActive ? handleAlbumClick() : setCurrentIndex(albumIndex)}
+                  aria-label={isActive ? `Open ${album.name}` : `Show ${album.name}`}
+                >
+                  <img
+                    src={album.url}
+                    alt={album.name}
+                    loading="eager"
+                    decoding="async"
+                  />
+                  {isActive && <span>{album.name}</span>}
+                </button>
+              );
+            })}
+          </div>
         </div>
         <button className="arrow left-arrow" onClick={prevImage}>‹</button>
         <button className="arrow right-arrow" onClick={nextImage}>›</button>
