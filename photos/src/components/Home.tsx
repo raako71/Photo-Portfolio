@@ -7,6 +7,8 @@ interface Album {
   name: string;
 }
 
+const getDisplayAlbumName = (albumName: string) => albumName.replace(/^1/, '');
+
 function Home() {
   const [albums, setAlbums] = useState<Album[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -50,7 +52,16 @@ function Home() {
 
       // Sort albums and get first image from each, using the thumbnail-sized cover for the home screen
       const albumList: Album[] = [];
-      const sortedAlbumNames = Object.keys(manifest).sort();
+      const sortedAlbumNames = Object.keys(manifest).sort((firstAlbum, secondAlbum) => {
+        const firstIsFeatured = firstAlbum.startsWith('1');
+        const secondIsFeatured = secondAlbum.startsWith('1');
+
+        if (firstIsFeatured !== secondIsFeatured) {
+          return firstIsFeatured ? -1 : 1;
+        }
+
+        return firstAlbum.localeCompare(secondAlbum);
+      });
 
       for (const albumName of sortedAlbumNames) {
         const images = manifest[albumName] || [];
@@ -154,21 +165,22 @@ function Home() {
           >
             {albums.map((album, albumIndex) => {
               const isActive = albumIndex === currentIndex;
+              const displayName = getDisplayAlbumName(album.name);
 
               return (
                 <button
                   key={album.name}
                   className={`carousel-card ${isActive ? 'active' : ''}`}
                   onClick={() => isActive ? handleAlbumClick() : setCurrentIndex(albumIndex)}
-                  aria-label={isActive ? `Open ${album.name}` : `Show ${album.name}`}
+                  aria-label={isActive ? `Open ${displayName}` : `Show ${displayName}`}
                 >
                   <img
                     src={album.url}
-                    alt={album.name}
+                    alt={displayName}
                     loading="eager"
                     decoding="async"
                   />
-                  {isActive && <span>{album.name}</span>}
+                  {isActive && <span>{displayName}</span>}
                 </button>
               );
             })}

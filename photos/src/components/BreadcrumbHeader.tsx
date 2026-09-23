@@ -6,6 +6,8 @@ interface BreadcrumbHeaderProps {
 }
 
 function BreadcrumbHeader({ albumName, isFullscreen = false }: BreadcrumbHeaderProps) {
+  const displayAlbumName = albumName?.replace(/^1/, '');
+
   return (
     <header className={`breadcrumb-header ${isFullscreen ? 'fullscreen-header' : ''}`}>
       <nav aria-label="Breadcrumb">
@@ -13,7 +15,7 @@ function BreadcrumbHeader({ albumName, isFullscreen = false }: BreadcrumbHeaderP
         {albumName && (
           <>
             <span aria-hidden="true">&gt;</span>
-            <Link to={`/${albumName}`}>{albumName}</Link>
+            <Link to={`/${albumName}`}>{displayAlbumName}</Link>
           </>
         )}
         {isFullscreen && (
