@@ -97,6 +97,7 @@ button:focus-visible {
   justify-content: center;
   gap: 10px;
   font-size: 14px;
+  flex-wrap: wrap;
 }
 
 .breadcrumb-header a {
@@ -112,6 +113,33 @@ button:focus-visible {
 
 .breadcrumb-header span[aria-current="page"] {
   color: rgba(255, 255, 255, 0.65);
+}
+
+.breadcrumb-sep {
+  opacity: 0.45;
+}
+
+.load-all-btn {
+  margin: 0;
+  padding: 4px 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.load-all-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.load-all-btn:disabled {
+  opacity: 0.75;
+  cursor: default;
 }
 
 .fullscreen-header {
