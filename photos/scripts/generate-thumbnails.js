@@ -74,7 +74,7 @@ async function generateThumbnails() {
               .rotate()
               .resize(thumbnailSize, thumbnailSize, {
                 fit: 'cover',
-                position: 'centre'
+                  position: 'top'
               })
               .jpeg({ quality: 80 })
               .toFile(thumbPath);
