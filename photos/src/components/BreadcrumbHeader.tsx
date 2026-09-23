@@ -25,7 +25,7 @@ function BreadcrumbHeader({ albumName, isFullscreen = false }: BreadcrumbHeaderP
     }
   };
 
-  const startPress = (e: React.MouseEvent | React.TouchEvent) => {
+  const startPress = () => {
     // Don't block normal navigation on short taps
     clearPressTimer();
     pressTimer.current = setTimeout(() => {
