@@ -1,7 +1,7 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { confirmClearPwaCacheAndReload } from '../utils/pwa';
-import { prefetchAlbumImages, prefetchAllImages } from '../utils/prefetch';
+import { PWA_PREFETCH_EVENT, type PwaPrefetchDetail } from '../hooks/usePwaOfflinePrefetch';
 
 interface BreadcrumbHeaderProps {
   albumName?: string;
@@ -10,14 +10,37 @@ interface BreadcrumbHeaderProps {
 
 /**
  * Home is a normal React Router link.
- * "Load all" prefetches images into the PWA cache for offline use.
+ * Offline cache status shows here while the installed PWA prefetches images.
  * Hidden force-reload: long-press the header bar background (~2.5s).
  */
 function BreadcrumbHeader({ albumName, isFullscreen = false }: BreadcrumbHeaderProps) {
   const displayAlbumName = albumName?.replace(/^1/, '');
   const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [loadingAll, setLoadingAll] = useState(false);
-  const [progressLabel, setProgressLabel] = useState('');
+  const [prefetchLabel, setPrefetchLabel] = useState('');
+
+  useEffect(() => {
+    const onPrefetch = (event: Event) => {
+      const detail = (event as CustomEvent<PwaPrefetchDetail>).detail;
+      if (!detail) return;
+
+      if (detail.status === 'start') {
+        setPrefetchLabel('Caching offline…');
+      } else if (detail.status === 'progress') {
+        setPrefetchLabel(
+          detail.total === 0 ? 'Caching offline…' : `Caching ${detail.done}/${detail.total}`
+        );
+      } else if (detail.status === 'done') {
+        setPrefetchLabel('Offline ready');
+        window.setTimeout(() => setPrefetchLabel(''), 2500);
+      } else if (detail.status === 'error') {
+        setPrefetchLabel('Cache failed');
+        window.setTimeout(() => setPrefetchLabel(''), 4000);
+      }
+    };
+
+    window.addEventListener(PWA_PREFETCH_EVENT, onPrefetch);
+    return () => window.removeEventListener(PWA_PREFETCH_EVENT, onPrefetch);
+  }, []);
 
   const clearPressTimer = () => {
     if (pressTimer.current) {
@@ -34,34 +57,6 @@ function BreadcrumbHeader({ albumName, isFullscreen = false }: BreadcrumbHeaderP
       pressTimer.current = null;
       confirmClearPwaCacheAndReload();
     }, 2500);
-  };
-
-  const handleLoadAll = async () => {
-    if (loadingAll) return;
-
-    setLoadingAll(true);
-    setProgressLabel('Starting…');
-
-    try {
-      const onProgress = ({ done, total }: { done: number; total: number }) => {
-        setProgressLabel(total === 0 ? 'Nothing to load' : `${done}/${total}`);
-      };
-
-      if (albumName) {
-        await prefetchAlbumImages(albumName, onProgress);
-      } else {
-        await prefetchAllImages(onProgress);
-      }
-
-      setProgressLabel('Done');
-      setTimeout(() => setProgressLabel(''), 2000);
-    } catch (err) {
-      console.error('Load all failed:', err);
-      setProgressLabel('Failed');
-      setTimeout(() => setProgressLabel(''), 3000);
-    } finally {
-      setLoadingAll(false);
-    }
   };
 
   return (
@@ -87,20 +82,14 @@ function BreadcrumbHeader({ albumName, isFullscreen = false }: BreadcrumbHeaderP
           </>
         )}
 
-        {!isFullscreen && (
+        {!isFullscreen && prefetchLabel && (
           <>
             <span className="breadcrumb-sep" aria-hidden="true">
               ·
             </span>
-            <button
-              type="button"
-              className="load-all-btn"
-              onClick={handleLoadAll}
-              disabled={loadingAll}
-              title={albumName ? 'Download this album for offline use' : 'Download all photos for offline use'}
-            >
-              {loadingAll ? `Loading ${progressLabel}` : 'Load all'}
-            </button>
+            <span className="prefetch-status" aria-live="polite">
+              {prefetchLabel}
+            </span>
           </>
         )}
       </nav>
