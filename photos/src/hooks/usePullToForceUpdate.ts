@@ -6,10 +6,11 @@ const MAX_PULL = 140;
 
 /**
  * Pull-down (overscroll) gesture → confirm force cache clear + reload.
+ * Only active when `enabled` is true (intended for Home only).
  * Only works when online. Works on touch (tablet) and mouse (desktop).
  * Only activates when the page is already scrolled to the top.
  */
-export function usePullToForceUpdate() {
+export function usePullToForceUpdate(enabled = true) {
   const [pullDistance, setPullDistance] = useState(0);
   const [armed, setArmed] = useState(false);
   const [offline, setOffline] = useState(false);
@@ -17,12 +18,26 @@ export function usePullToForceUpdate() {
   const startY = useRef(0);
   const tracking = useRef(false);
   const armedRef = useRef(false);
+  const enabledRef = useRef(enabled);
+  enabledRef.current = enabled;
+
+  useEffect(() => {
+    // Reset visual state when disabled (e.g. navigated to album)
+    if (!enabled) {
+      tracking.current = false;
+      armedRef.current = false;
+      setPullDistance(0);
+      setArmed(false);
+      setOffline(false);
+    }
+  }, [enabled]);
 
   useEffect(() => {
     const atTop = () =>
       (window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0) <= 2;
 
     const onStart = (clientY: number) => {
+      if (!enabledRef.current) return;
       if (!atTop()) return;
       startY.current = clientY;
       tracking.current = true;
@@ -33,7 +48,7 @@ export function usePullToForceUpdate() {
     };
 
     const onMove = (clientY: number, e: Event) => {
-      if (!tracking.current) return;
+      if (!enabledRef.current || !tracking.current) return;
 
       const delta = clientY - startY.current;
       if (delta <= 0) {
@@ -44,7 +59,6 @@ export function usePullToForceUpdate() {
         return;
       }
 
-      // Only treat as pull-to-refresh when still at top
       if (!atTop()) {
         tracking.current = false;
         setPullDistance(0);
@@ -54,18 +68,16 @@ export function usePullToForceUpdate() {
         return;
       }
 
-      const distance = Math.min(delta * 0.55, MAX_PULL); // rubber-band feel
+      const distance = Math.min(delta * 0.55, MAX_PULL);
       setPullDistance(distance);
 
       const online = isOnline();
       setOffline(!online);
 
-      // Only arm the force-update when online
       const isArmed = online && distance >= PULL_THRESHOLD;
       armedRef.current = isArmed;
       setArmed(isArmed);
 
-      // Reduce browser overscroll bounce competing with our gesture
       if (delta > 8) {
         e.preventDefault();
       }
@@ -75,12 +87,11 @@ export function usePullToForceUpdate() {
       if (!tracking.current) return;
       tracking.current = false;
 
-      if (armedRef.current && isOnline()) {
+      if (enabledRef.current && armedRef.current && isOnline()) {
         setPullDistance(0);
         setArmed(false);
         armedRef.current = false;
         setOffline(false);
-        // Small delay so the indicator can collapse before the confirm dialog
         window.setTimeout(() => confirmClearPwaCacheAndReload(), 50);
         return;
       }
@@ -109,7 +120,6 @@ export function usePullToForceUpdate() {
     const onMouseMove = (e: MouseEvent) => onMove(e.clientY, e);
     const onMouseUp = () => onEnd();
 
-    // passive: false so we can preventDefault on touchmove when pulling
     window.addEventListener('touchstart', onTouchStart, { passive: true });
     window.addEventListener('touchmove', onTouchMove, { passive: false });
     window.addEventListener('touchend', onTouchEnd);
