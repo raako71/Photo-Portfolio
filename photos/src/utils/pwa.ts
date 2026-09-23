@@ -29,7 +29,18 @@ export async function clearPwaCacheAndReload(): Promise<void> {
   window.location.reload();
 }
 
+export function isOnline(): boolean {
+  return typeof navigator !== 'undefined' ? navigator.onLine !== false : true;
+}
+
 export function confirmClearPwaCacheAndReload(): void {
+  if (!isOnline()) {
+    window.alert(
+      'No network connection.\n\nForce update needs the internet so new photos and app updates can be downloaded.'
+    );
+    return;
+  }
+
   const ok = window.confirm(
     'Force update?\n\nThis clears the offline cache and reloads so new photos / app updates are downloaded.\n\nContinue?'
   );

@@ -9,12 +9,12 @@ function App() {
   // Installed PWA only: background-cache every photo for offline use
   usePwaOfflinePrefetch();
 
-  // Pull down from top of window → force cache clear + reload
-  const { pullDistance, armed } = usePullToForceUpdate();
+  // Pull down from top of window → force cache clear + reload (online only)
+  const { pullDistance, armed, offline } = usePullToForceUpdate();
 
   return (
     <BrowserRouter>
-      <PullToUpdateIndicator pullDistance={pullDistance} armed={armed} />
+      <PullToUpdateIndicator pullDistance={pullDistance} armed={armed} offline={offline} />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/:albumName" element={<Album />} />

@@ -8,14 +8,14 @@ interface BreadcrumbHeaderProps {
 }
 
 /**
- * Home crumb shows the site host (photos.raako.net) and links to "/".
- * Offline cache status shows here while the installed PWA prefetches images.
- * Force-update: pull down from the top of the window (see usePullToForceUpdate).
+ * Site host sits above the breadcrumbs; root crumb is "Home".
+ * Offline cache status shows while the installed PWA prefetches images.
+ * Force-update: pull down from the top of the window (online only).
  */
 function BreadcrumbHeader({ albumName, isFullscreen = false }: BreadcrumbHeaderProps) {
   const displayAlbumName = albumName?.replace(/^1/, '');
   const [prefetchLabel, setPrefetchLabel] = useState('');
-  const homeLabel =
+  const siteHost =
     typeof window !== 'undefined' && window.location?.host
       ? window.location.host
       : 'photos.raako.net';
@@ -46,9 +46,14 @@ function BreadcrumbHeader({ albumName, isFullscreen = false }: BreadcrumbHeaderP
 
   return (
     <header className={`breadcrumb-header ${isFullscreen ? 'fullscreen-header' : ''}`}>
+      {!isFullscreen && (
+        <div className="site-host" aria-hidden="true">
+          {siteHost}
+        </div>
+      )}
       <nav aria-label="Breadcrumb">
         <Link to="/" title="Home">
-          {homeLabel}
+          Home
         </Link>
         {albumName && (
           <>

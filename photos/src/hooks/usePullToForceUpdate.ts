@@ -1,17 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
-import { confirmClearPwaCacheAndReload } from '../utils/pwa';
+import { confirmClearPwaCacheAndReload, isOnline } from '../utils/pwa';
 
 const PULL_THRESHOLD = 90; // px of downward drag to arm the force-update
 const MAX_PULL = 140;
 
 /**
  * Pull-down (overscroll) gesture → confirm force cache clear + reload.
- * Works on touch (tablet) and mouse (desktop testing).
+ * Only works when online. Works on touch (tablet) and mouse (desktop).
  * Only activates when the page is already scrolled to the top.
  */
 export function usePullToForceUpdate() {
   const [pullDistance, setPullDistance] = useState(0);
   const [armed, setArmed] = useState(false);
+  const [offline, setOffline] = useState(false);
 
   const startY = useRef(0);
   const tracking = useRef(false);
@@ -27,6 +28,7 @@ export function usePullToForceUpdate() {
       tracking.current = true;
       armedRef.current = false;
       setArmed(false);
+      setOffline(false);
       setPullDistance(0);
     };
 
@@ -38,6 +40,7 @@ export function usePullToForceUpdate() {
         setPullDistance(0);
         setArmed(false);
         armedRef.current = false;
+        setOffline(false);
         return;
       }
 
@@ -47,13 +50,18 @@ export function usePullToForceUpdate() {
         setPullDistance(0);
         setArmed(false);
         armedRef.current = false;
+        setOffline(false);
         return;
       }
 
       const distance = Math.min(delta * 0.55, MAX_PULL); // rubber-band feel
       setPullDistance(distance);
 
-      const isArmed = distance >= PULL_THRESHOLD;
+      const online = isOnline();
+      setOffline(!online);
+
+      // Only arm the force-update when online
+      const isArmed = online && distance >= PULL_THRESHOLD;
       armedRef.current = isArmed;
       setArmed(isArmed);
 
@@ -67,10 +75,11 @@ export function usePullToForceUpdate() {
       if (!tracking.current) return;
       tracking.current = false;
 
-      if (armedRef.current) {
+      if (armedRef.current && isOnline()) {
         setPullDistance(0);
         setArmed(false);
         armedRef.current = false;
+        setOffline(false);
         // Small delay so the indicator can collapse before the confirm dialog
         window.setTimeout(() => confirmClearPwaCacheAndReload(), 50);
         return;
@@ -79,6 +88,7 @@ export function usePullToForceUpdate() {
       setPullDistance(0);
       setArmed(false);
       armedRef.current = false;
+      setOffline(false);
     };
 
     const onTouchStart = (e: TouchEvent) => {
@@ -119,5 +129,5 @@ export function usePullToForceUpdate() {
     };
   }, []);
 
-  return { pullDistance, armed };
+  return { pullDistance, armed, offline };
 }
