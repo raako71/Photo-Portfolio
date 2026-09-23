@@ -1,6 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { confirmClearPwaCacheAndReload } from '../utils/pwa';
 import { PWA_PREFETCH_EVENT, type PwaPrefetchDetail } from '../hooks/usePwaOfflinePrefetch';
 
 interface BreadcrumbHeaderProps {
@@ -11,11 +10,10 @@ interface BreadcrumbHeaderProps {
 /**
  * Home crumb shows the site host (photos.raako.net) and links to "/".
  * Offline cache status shows here while the installed PWA prefetches images.
- * Hidden force-reload: long-press the header bar background (~2.5s).
+ * Force-update: pull down from the top of the window (see usePullToForceUpdate).
  */
 function BreadcrumbHeader({ albumName, isFullscreen = false }: BreadcrumbHeaderProps) {
   const displayAlbumName = albumName?.replace(/^1/, '');
-  const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [prefetchLabel, setPrefetchLabel] = useState('');
   const homeLabel =
     typeof window !== 'undefined' && window.location?.host
@@ -46,34 +44,11 @@ function BreadcrumbHeader({ albumName, isFullscreen = false }: BreadcrumbHeaderP
     return () => window.removeEventListener(PWA_PREFETCH_EVENT, onPrefetch);
   }, []);
 
-  const clearPressTimer = () => {
-    if (pressTimer.current) {
-      clearTimeout(pressTimer.current);
-      pressTimer.current = null;
-    }
-  };
-
-  const onHeaderPointerDown = (e: React.PointerEvent) => {
-    if ((e.target as HTMLElement).closest('a, button')) return;
-
-    clearPressTimer();
-    pressTimer.current = setTimeout(() => {
-      pressTimer.current = null;
-      confirmClearPwaCacheAndReload();
-    }, 2500);
-  };
-
   return (
-    <header
-      className={`breadcrumb-header ${isFullscreen ? 'fullscreen-header' : ''}`}
-      onPointerDown={onHeaderPointerDown}
-      onPointerUp={clearPressTimer}
-      onPointerLeave={clearPressTimer}
-      onPointerCancel={clearPressTimer}
-    >
+    <header className={`breadcrumb-header ${isFullscreen ? 'fullscreen-header' : ''}`}>
       <nav aria-label="Breadcrumb">
         <Link to="/" title="Home">
-          Home ({homeLabel})
+          {homeLabel}
         </Link>
         {albumName && (
           <>
