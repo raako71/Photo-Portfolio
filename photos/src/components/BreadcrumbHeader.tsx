@@ -83,13 +83,13 @@ function BreadcrumbHeader({ albumName, isFullscreen = false }: BreadcrumbHeaderP
         </a>
         {albumName && (
           <>
-            <span aria-hidden="true">></span>
+            <span aria-hidden="true">&gt;</span>
             <Link to={`/${albumName}`}>{displayAlbumName}</Link>
           </>
         )}
         {isFullscreen && (
           <>
-            <span aria-hidden="true">></span>
+            <span aria-hidden="true">&gt;</span>
             <span aria-current="page">Fullscreen</span>
           </>
         )}
