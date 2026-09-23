@@ -1,4 +1,4 @@
-photos/images/*
 photos/public/images/*
-/photos/sources
 photos/public/albums-manifest.json
+photos/sources/images/*
+!photos/sources/images/.gitkeep

@@ -46,23 +46,30 @@ function Home() {
       // Fetch the albums manifest
       const response = await fetch('/albums-manifest.json');
       const manifest = await response.json();
-      
-      // Sort albums and get first image from each
+
+      // Sort albums and get first image from each, using the thumbnail-sized cover for the home screen
       const albumList: Album[] = [];
       const sortedAlbumNames = Object.keys(manifest).sort();
-      
+
       for (const albumName of sortedAlbumNames) {
         const images = manifest[albumName] || [];
         if (images.length > 0) {
           albumList.push({
-            url: `/images/${albumName}/web/${images[0]}`,
+            url: `/images/${albumName}/home/${images[0]}`,
             name: albumName
           });
         }
       }
-      
+
       console.log('Loaded albums from manifest:', albumList);
       setAlbums(albumList);
+
+      // Preload all album cover images so they are ready immediately on the home screen.
+      albumList.forEach((album) => {
+        const img = new Image();
+        img.src = album.url;
+      });
+
       setLoading(false);
     } catch (error) {
       console.error('Error fetching albums:', error);
@@ -135,6 +142,8 @@ function Home() {
           src={albums[currentIndex].url}
           alt={albums[currentIndex].name}
           onClick={handleAlbumClick}
+          loading="eager"
+          decoding="async"
           className={`slider-image ${fadeOut ? 'fade-out' : 'fade-in'}`}
         />
         <div className="album-name" onClick={handleAlbumClick}>

@@ -8,8 +8,9 @@ const __dirname = path.dirname(__filename);
 
 const sourcesDir = path.join(__dirname, '..', 'sources', 'images');
 const publicDir = path.join(__dirname, '..', 'public', 'images');
-const thumbnailSize = 200;
-const webSize = 1920; // Max dimension for web-sized images
+const thumbnailSize = 240;
+const homeSize = 1200; // Used for home-screen cover images
+const webSize = 2200; // Full-screen image max dimension
 
 async function generateThumbnails() {
   try {
@@ -24,14 +25,18 @@ async function generateThumbnails() {
       const sourceAlbumPath = path.join(sourcesDir, album);
       const publicAlbumPath = path.join(publicDir, album);
       const thumbDir = path.join(publicAlbumPath, 'thumbs');
+      const homeDir = path.join(publicAlbumPath, 'home');
       const webDir = path.join(publicAlbumPath, 'web');
 
-      // Create public album, thumbs and web directories if they don't exist
+      // Create public album, thumbnails, home-screen, and web directories if they don't exist
       if (!fs.existsSync(publicAlbumPath)) {
         fs.mkdirSync(publicAlbumPath, { recursive: true });
       }
       if (!fs.existsSync(thumbDir)) {
         fs.mkdirSync(thumbDir, { recursive: true });
+      }
+      if (!fs.existsSync(homeDir)) {
+        fs.mkdirSync(homeDir, { recursive: true });
       }
       if (!fs.existsSync(webDir)) {
         fs.mkdirSync(webDir, { recursive: true });
@@ -49,13 +54,15 @@ async function generateThumbnails() {
       for (const file of files) {
         const inputPath = path.join(sourceAlbumPath, file);
         const thumbPath = path.join(thumbDir, file);
+        const homePath = path.join(homeDir, file);
         const webPath = path.join(webDir, file);
 
-        // Skip if both files already exist
+        // Skip if all generated sizes already exist
         const thumbExists = fs.existsSync(thumbPath);
+        const homeExists = fs.existsSync(homePath);
         const webExists = fs.existsSync(webPath);
-        
-        if (thumbExists && webExists) {
+
+        if (thumbExists && homeExists && webExists) {
           console.log(`  ⊙ Skipped (already exists): ${file}`);
           continue;
         }
@@ -66,10 +73,23 @@ async function generateThumbnails() {
             await sharp(inputPath)
               .rotate()
               .resize(thumbnailSize, thumbnailSize, {
-                fit: 'contain',
-                background: { r: 0, g: 0, b: 0, alpha: 0 }
+                fit: 'cover',
+                position: 'centre'
               })
+              .jpeg({ quality: 80 })
               .toFile(thumbPath);
+          }
+
+          // Generate home-screen image if it doesn't exist
+          if (!homeExists) {
+            await sharp(inputPath)
+              .rotate()
+              .resize(homeSize, homeSize, {
+                fit: 'inside',
+                withoutEnlargement: true
+              })
+              .jpeg({ quality: 85 })
+              .toFile(homePath);
           }
 
           // Generate web-sized image if it doesn't exist
@@ -80,11 +100,11 @@ async function generateThumbnails() {
                 fit: 'inside',
                 withoutEnlargement: true
               })
-              .jpeg({ quality: 85 })
+              .jpeg({ quality: 90 })
               .toFile(webPath);
           }
 
-          console.log(`  ✓ Created ${!thumbExists ? 'thumbnail' : ''} ${!thumbExists && !webExists ? 'and' : ''} ${!webExists ? 'web image' : ''}: ${file}`);
+          console.log(`  ✓ Created ${!thumbExists ? 'thumbnail' : ''}${!thumbExists && (!homeExists || !webExists) ? ', ' : ''}${!homeExists ? 'home image' : ''}${!homeExists && !webExists ? ', ' : ''}${!webExists ? 'web image' : ''}: ${file}`);
         } catch (error) {
           console.error(`  ✗ Error processing ${file}:`, error.message);
         }

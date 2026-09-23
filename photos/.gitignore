@@ -12,6 +12,12 @@ dist
 dist-ssr
 *.local
 
+# Generated assets
+public/images/*
+public/albums-manifest.json
+sources/images/*
+!sources/images/.gitkeep
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
