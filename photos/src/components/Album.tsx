@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import BreadcrumbHeader from './BreadcrumbHeader';
+
+const SWIPE_CLOSE_THRESHOLD = 80; // px vertical swipe to close fullscreen
 
 function Album() {
   const { albumName } = useParams<{ albumName: string }>();
@@ -8,6 +10,9 @@ function Album() {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
+
+  const touchStartY = useRef<number | null>(null);
+  const touchStartX = useRef<number | null>(null);
 
   useEffect(() => {
     if (albumName) {
@@ -17,16 +22,45 @@ function Album() {
 
   const fetchAlbumImages = async (name: string) => {
     try {
-      // Fetch the albums manifest
       const response = await fetch('/albums-manifest.json');
       const manifest = await response.json();
-      
+
       const albumImages = manifest[name] || [];
       setImages(albumImages);
       setLoading(false);
     } catch (error) {
       console.error('Error loading album:', error);
       setLoading(false);
+    }
+  };
+
+  const closeOverlay = () => setIsOverlayOpen(false);
+
+  const onOverlayTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length !== 1) return;
+    touchStartY.current = e.touches[0].clientY;
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const onOverlayTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartY.current == null || touchStartX.current == null) return;
+    if (e.changedTouches.length !== 1) {
+      touchStartY.current = null;
+      touchStartX.current = null;
+      return;
+    }
+
+    const endY = e.changedTouches[0].clientY;
+    const endX = e.changedTouches[0].clientX;
+    const deltaY = endY - touchStartY.current;
+    const deltaX = endX - touchStartX.current;
+
+    touchStartY.current = null;
+    touchStartX.current = null;
+
+    // Prefer vertical swipe: close when mostly vertical and past threshold
+    if (Math.abs(deltaY) >= SWIPE_CLOSE_THRESHOLD && Math.abs(deltaY) > Math.abs(deltaX)) {
+      closeOverlay();
     }
   };
 
@@ -41,7 +75,7 @@ function Album() {
   return (
     <div className="album-container">
       <BreadcrumbHeader albumName={albumName} />
-      
+
       <div className="image-viewer">
         <img
           src={`/images/${albumName}/web/${images[selectedIndex]}`}
@@ -53,9 +87,11 @@ function Album() {
       </div>
 
       {isOverlayOpen && (
-        <div 
+        <div
           className="image-overlay"
-          onClick={() => setIsOverlayOpen(false)}
+          onClick={closeOverlay}
+          onTouchStart={onOverlayTouchStart}
+          onTouchEnd={onOverlayTouchEnd}
         >
           <BreadcrumbHeader albumName={albumName} isFullscreen />
           <img
@@ -63,12 +99,13 @@ function Album() {
             alt={images[selectedIndex]}
             className="overlay-image"
             onClick={(e) => e.stopPropagation()}
+            draggable={false}
           />
         </div>
       )}
 
       <div className="scroll-indicator">▼</div>
-      
+
       <div className="thumbnails">
         {images.map((imgName, index) => (
           <img
@@ -81,7 +118,6 @@ function Album() {
           />
         ))}
       </div>
-
     </div>
   );
 }
