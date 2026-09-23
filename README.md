@@ -9,23 +9,23 @@ App source lives in the `photos/` subdirectory.
 ## Features
 
 - Progressive Web App (installable on tablet / phone / desktop)
-- **Infinite-style caching** of photo assets via service worker (`CacheFirst`, ~10 year max age + high entry limit)
-- Network-first for `albums-manifest.json` so new albums appear after a force update
-- **Hidden force-reload** to clear cache and pull fresh images / app code:
-  - **Long-press** the "Home" breadcrumb (~2.5 seconds), or
-  - **Click "Home" 5 times quickly**
-  - Confirm the dialog → caches + service workers are cleared → page reloads
+- Photos under `/images/` use **CacheFirst** (long-lived offline cache)
+- `albums-manifest.json` and page navigations use **NetworkFirst** (new albums / app shell update without wiping photo cache)
+- **Home** is a normal in-app link (no special handlers)
+- **Hidden force-reload** (clear all caches + reload):
+  - Long-press the **header bar background** (not the Home/album text) for ~2.5 seconds
+  - Confirm the dialog
 
 ## Development
 
 ```bash
 cd photos
 npm install
-npm run generate-thumbnails   # process sources/images → public/images + manifest
+npm run generate-thumbnails
 npm run dev
 ```
 
-Service worker is disabled in dev (`devOptions.enabled: false`).
+Service worker is disabled in dev.
 
 ## Production build
 
@@ -34,24 +34,18 @@ cd photos
 npm install
 npm run generate-thumbnails
 npm run build
-# output in photos/dist – copy to your web root (e.g. /var/www/photos)
+# copy photos/dist → web root (e.g. /var/www/photos)
 ```
 
 ## Nginx
 
-See [`deploy/nginx-photos.raako.net.conf`](deploy/nginx-photos.raako.net.conf) for a ready-to-use config.
+See [`deploy/nginx-photos.raako.net.conf`](deploy/nginx-photos.raako.net.conf).
 
-Key points:
-- `index.html`, `sw.js`, `manifest.webmanifest` → `Cache-Control: no-cache` (required for updates)
-- `/images/` and hashed `/assets/` → long-lived `immutable` cache
-- SPA `try_files` fallback to `index.html`
-
-## Icons
-
-Currently uses `public/camera.png`. For best install experience on iOS/Android, replace with proper 192×192 and 512×512 PNG icons and update the `icons` array in `vite.config.ts`.
+- `index.html`, `sw.js`, `manifest.webmanifest` → `no-cache`
+- `/images/` and `/assets/` → long-lived cache
 
 ## Force update on tablet
 
-1. Open the installed PWA (or the site).
-2. Long-press **Home** in the top breadcrumb, or tap Home five times quickly.
-3. Confirm → cache is wiped and the app reloads with the latest build + images.
+Long-press empty space on the top header bar → confirm → caches cleared and app reloads.
+
+Normal **Home** taps only navigate; they do not clear cache.
